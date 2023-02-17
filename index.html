@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio</title>
+</head>
+
+<body>
+
+    <script>
+
+        class EventEmitter {
+            constructor() {
+                this.events = new Map();
+            }
+
+            on(eventName, callback) {
+                if (!this.events.has(eventName)) {
+                    this.events.set(eventName, []);
+                }
+                this.events.get(eventName).push(callback);
+            }
+
+            off(eventName, callback) {
+
+                if (!this.events.has(eventName)) {
+                    return;
+                }
+                const callbacks = this.events.get(eventName);
+                const index = callbacks.indexOf(callback);
+                if (index !== -1) {
+                    callbacks.splice(index, 1);
+                }
+            }
+
+            emit(eventName, ...args) {
+                if (!this.events.has(eventName)) {
+                    return;
+                }
+                const callbacks = this.events.get(eventName);
+                callbacks.forEach(callback => {
+                    callback(...args);
+                });
+            }
+        }
+
+
+        class Client extends EventEmitter {
+
+            constructor(name) {
+                super();
+                this.name = name;
+            }
+        }
+
+
+        class Server {
+            constructor() {
+                this.clients = new Set();
+
+                this.handleClientMessage = this.handleClientMessage.bind(this);
+                this.handleClientMessageLog = this.handleClientMessageLog.bind(this);
+            }
+
+            connect(client) {
+
+                client.on('message', this.handleClientMessage);
+                client.on('message', this.handleClientMessageLog(client));
+                this.clients.add(client);
+                return this;
+            }
+
+            disconnect(client) {
+
+                client.off('message', this.handleClientMessage);
+                client.off('message', this.handleClientMessageLog);
+                this.clients.delete(client);
+                return this;
+            }
+
+            handleClientMessage(msg){
+                console.warn(`Registrando mensagem: ${msg}`);
+            }
+
+            handleClientMessageLog(client){
+                return (msg) => console.info(`[LOGGING][${client.name}]: ${msg}`);
+            };
+        }
+
+        let cli1 = new Client('teste1');
+        let cli2 = new Client('teste2');
+        let cli3 = new Client('Zueiro');
+
+        let server = new Server();
+        server.connect(cli1);
+        server.connect(cli2);
+        server.connect(cli3);
+
+        cli1.emit('message', 'Primeira mensagem do cliente 1');
+        cli2.emit('message', 'Primeira mensagem do cliente 2');
+        cli3.emit('message', '🍑 HeHeBoy!!!');
+
+        server.disconnect(cli1);
+        server.disconnect(cli2);
+        server.disconnect(cli3);
+
+        cli1.emit('message', 'Segunda mensagem do cliente 1');
+        cli2.emit('message', 'Segunda mensagem do cliente 2');
+        cli2.emit('message', '👅 HeHeBoy!!!');
+
+    </script>
+</body>
+
+</html>
