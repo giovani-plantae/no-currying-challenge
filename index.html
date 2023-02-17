@@ -13,11 +13,14 @@
     <script>
 
         class EventEmitter {
+
             constructor() {
+
                 this.events = new Map();
             }
 
             on(eventName, callback) {
+
                 if (!this.events.has(eventName)) {
                     this.events.set(eventName, []);
                 }
@@ -37,6 +40,7 @@
             }
 
             emit(eventName, ...args) {
+
                 if (!this.events.has(eventName)) {
                     return;
                 }
@@ -58,7 +62,9 @@
 
 
         class Server {
+
             constructor() {
+
                 this.clients = new Set();
 
                 this.handleClientMessage = this.handleClientMessage.bind(this);
@@ -82,31 +88,38 @@
             }
 
             handleClientMessage(msg){
+
                 console.warn(`Registrando mensagem: ${msg}`);
             }
 
             handleClientMessageLog(client){
+
                 return (msg) => console.info(`[LOGGING][${client.name}]: ${msg}`);
             };
         }
 
+        // Cria os clientes e nomeia eles
         let cli1 = new Client('teste1');
         let cli2 = new Client('teste2');
         let cli3 = new Client('Zueiro');
 
+        // Cria o servidor e conecta os clientes
         let server = new Server();
         server.connect(cli1);
         server.connect(cli2);
         server.connect(cli3);
 
+        // Primeira leva de mensagens, elas todas devem ser logadas em forma de warning e info
         cli1.emit('message', 'Primeira mensagem do cliente 1');
         cli2.emit('message', 'Primeira mensagem do cliente 2');
         cli3.emit('message', '🍑 HeHeBoy!!!');
 
+        // Desconecta os clientes
         server.disconnect(cli1);
         server.disconnect(cli2);
         server.disconnect(cli3);
 
+        // Segunda leva de mensagens, elas não deveriam mais ser logadas
         cli1.emit('message', 'Segunda mensagem do cliente 1');
         cli2.emit('message', 'Segunda mensagem do cliente 2');
         cli2.emit('message', '👅 HeHeBoy!!!');
